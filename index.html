@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="de"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Straßensanierungen Westerkappeln – Sperrungen</title>
+<style>
+:root{--bg:#f4f1ea;--card:#fff;--tx:#1f2a37;--mut:#5b6672;--ln:#d9d4c8;--red:#b3261e;--org:#b25e00;--grn:#2e7d32;--gry:#8a94a0;--acc:#1f4e79;
+box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#14181d;--card:#1d242c;--tx:#eceae4;--mut:#a3adb8;--ln:#33404c;--red:#ff7b70;--org:#ffa94d;--grn:#6fcf7f;--gry:#7b8794;--acc:#7fb4e6}}
+:root[data-theme="dark"]{--bg:#14181d;--card:#1d242c;--tx:#eceae4;--mut:#a3adb8;--ln:#33404c;--red:#ff7b70;--org:#ffa94d;--grn:#6fcf7f;--gry:#7b8794;--acc:#7fb4e6}
+*{box-sizing:border-box}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+body{margin:0;background:var(--bg);color:var(--tx);font:16px/1.45 Inter,system-ui,Arial,sans-serif}
+main{max-width:1100px;margin:0 auto;padding:20px 16px 40px}
+h1{font-size:clamp(24px,4vw,36px);margin:0 0 4px;line-height:1.15}
+.sub{color:var(--mut);margin:0 0 18px}
+.card{background:var(--card);border:1px solid var(--ln);border-radius:14px;padding:16px;margin-bottom:16px}
+.dateRow{display:flex;flex-wrap:wrap;gap:12px;align-items:center;justify-content:space-between}
+.date{font-size:22px;font-weight:700}
+input[type=range]{width:100%;margin:12px 0 4px;accent-color:var(--acc)}
+.ends{display:flex;justify-content:space-between;color:var(--mut);font-size:13px}
+button{font:inherit;border:1px solid var(--ln);background:var(--card);color:var(--tx);border-radius:8px;padding:6px 12px;cursor:pointer}
+.grid{display:grid;grid-template-columns:1.3fr 1fr;gap:16px}
+@media(max-width:800px){.grid{grid-template-columns:1fr}}
+svg{width:100%;height:auto;display:block}
+.seg{fill:none;stroke-width:13;stroke-linecap:round;cursor:pointer;stroke:var(--gry);stroke-dasharray:2 14}
+.seg.done{stroke:var(--grn);stroke-dasharray:none}
+.seg.active.full{stroke:var(--red);stroke-dasharray:none}
+.seg.active.part{stroke:var(--org);stroke-dasharray:none}
+.seg.est.active{opacity:.75}
+.seg.sel{filter:drop-shadow(0 0 4px var(--acc))}
+.road{fill:none;stroke:var(--ln);stroke-width:5}
+.rail{stroke:var(--mut);stroke-width:3;stroke-dasharray:10 6}
+.lbl{font-size:13px;fill:var(--tx);font-weight:600;pointer-events:none}
+.pin{font-size:13px;fill:var(--mut)}
+.badge{display:inline-block;padding:2px 10px;border-radius:99px;font-size:13px;font-weight:700;color:#fff}
+.b-full{background:var(--red)}.b-part{background:var(--org)}.b-done{background:var(--grn)}.b-planned{background:var(--gry)}
+:root[data-theme="dark"] .badge,:root:not([data-theme="light"]) .badge{color:#10151a}
+.legend{display:flex;flex-wrap:wrap;gap:12px;font-size:13px;color:var(--mut);margin-top:8px}
+.legend i{display:inline-block;width:22px;height:6px;border-radius:3px;margin-right:6px;vertical-align:middle}
+.det h3{margin:0 0 6px;font-size:20px}
+.det dt{font-weight:700;margin-top:10px;font-size:14px;color:var(--mut)}
+.det dd{margin:2px 0 0}
+a{color:var(--acc)}
+.gwrap{overflow-x:auto}
+.g{min-width:640px}
+.row{display:grid;grid-template-columns:170px 1fr;align-items:center;cursor:pointer;border-radius:8px;padding:3px 0}
+.row.sel{background:color-mix(in srgb,var(--acc) 12%,transparent)}
+.rl{font-size:14px;padding-right:8px}.rl small{display:block;color:var(--mut);font-size:12px}
+.tr{position:relative;height:30px;border-left:1px solid var(--ln)}
+.bar{position:absolute;top:5px;height:20px;border-radius:6px;background:var(--gry)}
+.bar.full{background:var(--red)}.bar.part{background:var(--org)}
+.bar.est{opacity:.55;background-image:repeating-linear-gradient(135deg,transparent 0 6px,rgba(255,255,255,.45) 6px 9px)}
+.pause{position:absolute;top:0;bottom:0;background:color-mix(in srgb,var(--acc) 14%,transparent);border-left:1px dashed var(--acc);border-right:1px dashed var(--acc)}
+.cur{position:absolute;top:-3px;bottom:-3px;width:2px;background:var(--tx);z-index:2}
+.months{position:relative;height:22px;margin-left:170px;font-size:12px;color:var(--mut)}
+.months span{position:absolute;transform:translateX(-50%)}
+.note{font-size:13px;color:var(--mut);margin-top:10px}
+</style></head><body><main>
+<h1>Straßensanierungen Westerkappeln</h1>
+<p class="sub">L599 · L584 · L595 – Mitte Oktober 2026 bis Mitte Juni 2027. Datum wählen und sehen, was gesperrt ist.</p>
+
+<div class="card">
+ <div class="dateRow"><div class="date" id="dt"></div><button id="today">Heute</button></div>
+ <input type="range" id="sl" min="0" max="243" value="4" aria-label="Datum wählen">
+ <div class="ends"><span>15. Okt 2026</span><span>15. Jun 2027</span></div>
+</div>
+
+<div class="grid">
+ <div class="card">
+  <svg viewBox="0 0 700 440" role="img" aria-label="Schematische Karte der Bauabschnitte, nicht maßstäblich" id="map">
+   <path class="road" d="M40 260H660M330 40V260M470 140V260"/>
+   <line class="rail" x1="60" y1="140" x2="650" y2="140"/>
+   <circle cx="330" cy="260" r="20" fill="var(--card)" stroke="var(--mut)" stroke-width="3"/>
+   <text class="pin" x="330" y="300" text-anchor="middle">Kreisverkehr L599/L584</text>
+   <text class="pin" x="560" y="130" text-anchor="middle">Bahnlinie</text>
+   <text class="pin" x="472" y="125" text-anchor="middle">Bahnhof</text>
+   <text class="pin" x="340" y="128">Bahnübergang</text>
+   <g id="segs"></g>
+   <text class="pin" x="60" y="420">Schemaskizze, nicht maßstäblich – Lage und Verlauf vereinfacht</text>
+  </svg>
+  <div class="legend"><span><i style="background:var(--red)"></i>Vollsperrung</span><span><i style="background:var(--org)"></i>Einbahn / halbseitig</span><span><i style="background:var(--grn)"></i>fertig</span><span><i style="background:var(--gry)"></i>geplant</span></div>
+ </div>
+ <div class="card det" id="det"></div>
+</div>
+
+<div class="card">
+ <div class="gwrap"><div class="g">
+  <div class="months" id="mo"></div>
+  <div id="rows"></div>
+ </div></div>
+ <p class="note">Schraffierte Balken: Für die Abschnitte 3–7 nennt Straßen.NRW nur „Frühjahr 2027“ bis Mitte Juni 2027; der Startmonat (hier März) und die Reihenfolge sind eine Annahme. Die blaue Fläche markiert die Winterpause (Mitte Dezember bis Mitte Januar).</p>
+</div>
+<p class="note">Quelle: <a href="https://www.strassen.nrw.de/de/l595-l599-l584-strassensanierungen-in-westerkappeln-projektueberblick.html" target="_blank" rel="noopener">Straßen.NRW Projektüberblick</a> · <a href="https://www.verkehr.nrw/?center=52.31526,7.87868&zoom=15&layer=Verkehrslage,Baustellen,Verkehrsmeldungen" target="_blank" rel="noopener">Aktuelle Karte bei verkehr.nrw</a></p>
+</main>
+<script>
+var BASE=Date.UTC(2026,9,15),N=243;
+function off(s){var p=s.split('-');return Math.round((Date.UTC(+p[0],+p[1]-1,+p[2])-BASE)/864e5)}
+var S=[
+{id:'1',n:'Abschnitt 1',st:'L584 Am Dölhof + Teile des Kreisverkehrs',f:'2026-10-15',t:'2026-12-15',ty:'full',est:0,reg:'Vollsperrung',um:'Südlich über Hollenbergs Hügel; für Recke–Osnabrück zusätzlich eine innerörtliche Umleitung.',q:'Am Dölhof, Westerkappeln',d:'M330 260H470'},
+{id:'2',n:'Abschnitt 2',st:'L599 Mettinger Straße (Gödeking bis Kreisverkehr)',f:'2026-11-02',t:'2026-12-15',ty:'part',est:0,reg:'Einbahnstraße (Mettingen → Osnabrück frei), einzelne Tage Vollsperrung (Asphalteinbau, Kampfmittelsondierung).',um:'Richtung Mettingen südlich über Hollenbergs Hügel; Linienbusse nördlich über Heerstraße und Wirtschaftswege.',q:'Mettinger Straße, Westerkappeln',d:'M60 260H310'},
+{id:'3',n:'Abschnitt 3 + 4',st:'L595 Heerstraße (Kreisverkehr bis Bahnübergang)',f:'2027-03-01',t:'2027-06-15',ty:'part',est:1,reg:'Halbseitige Sperrung mit Ampel.',um:'Keine Umleitungsstrecke vorgesehen.',q:'Heerstraße, Westerkappeln',d:'M330 240V150'},
+{id:'5',n:'Abschnitt 5',st:'L595 Heerstraße (hinter dem Bahnübergang)',f:'2027-03-01',t:'2027-06-15',ty:'full',est:1,reg:'Vollsperrung.',um:'Westlich über Mettingen.',q:'Heerstraße, Westerkappeln',d:'M330 130V50'},
+{id:'6',n:'Abschnitt 6',st:'L584 Alte Poststraße (bis hinter Bahnhof)',f:'2027-03-01',t:'2027-06-15',ty:'part',est:1,reg:'Überwiegend Einbahnstraße, einzelne Tage Vollsperrung.',um:'Umleitungsstrecke durch den Ortskern.',q:'Alte Poststraße, Westerkappeln',d:'M470 245V150'},
+{id:'7',n:'Abschnitt 7',st:'L584 Bramscher Straße',f:'2027-03-01',t:'2027-06-15',ty:'full',est:1,reg:'Vollsperrung.',um:'Großräumig über Wersen/Lotte; für Busse eine Route durch Westerkappeln.',q:'Bramscher Straße, Westerkappeln',d:'M490 260H660'}];
+var sel='1',sl=document.getElementById('sl');
+function status(s,d){return d<off(s.f)?'planned':d>off(s.t)?'done':'active'}
+function fmt(d){return new Date(BASE+d*864e5).toLocaleDateString('de-DE',{day:'numeric',month:'long',year:'numeric',timeZone:'UTC'})}
+function fs(s){var p=s.split('-');return new Date(Date.UTC(+p[0],+p[1]-1,+p[2])).toLocaleDateString('de-DE',{day:'numeric',month:'short',year:'numeric',timeZone:'UTC'})}
+var NS='http://www.w3.org/2000/svg',g=document.getElementById('segs');
+S.forEach(function(s){
+ var p=document.createElementNS(NS,'path');p.setAttribute('d',s.d);p.id='seg'+s.id;p.addEventListener('click',function(){pick(s.id)});g.appendChild(p);
+ var m=s.d.match(/^M(\d+) (\d+)/),t=document.createElementNS(NS,'text');t.setAttribute('class','lbl');
+ var x=+m[1],y=+m[2],ax=x,ay=y;
+ if(s.id==='2'){ax=185;ay=240}else if(s.id==='1'){ax=400;ay=240}else if(s.id==='3'){ax=345;ay=205}else if(s.id==='5'){ax=345;ay=90}else if(s.id==='6'){ax=484;ay=200}else{ax=575;ay=240}
+ t.setAttribute('x',ax);t.setAttribute('y',ay);t.setAttribute('text-anchor',s.id==='2'||s.id==='1'||s.id==='7'?'middle':'start');t.textContent=s.id==='3'?'3+4':s.id;g.appendChild(t)});
+var mo=document.getElementById('mo'),M=['Nov','Dez','Jan','Feb','Mär','Apr','Mai','Jun'],ds=[[2026,11],[2026,12],[2027,1],[2027,2],[2027,3],[2027,4],[2027,5],[2027,6]];
+mo.innerHTML='<span style="left:0;transform:none">Okt</span>'+ds.map(function(a,i){return '<span style="left:'+off(a[0]+'-'+String(a[1]).padStart(2,'0')+'-01')/N*100+'%">'+M[i]+'</span>'}).join('');
+var rows=document.getElementById('rows');
+rows.innerHTML=S.map(function(s){var l=off(s.f)/N*100,w=(off(s.t)-off(s.f))/N*100,pl=off('2026-12-15')/N*100,pw=(off('2027-01-15')-off('2026-12-15'))/N*100;
+ return '<div class="row" data-id="'+s.id+'"><div class="rl">'+s.n+'<small>'+s.st.split(' (')[0]+'</small></div><div class="tr"><div class="pause" style="left:'+pl+'%;width:'+pw+'%"></div><div class="bar '+s.ty+(s.est?' est':'')+'" style="left:'+l+'%;width:'+w+'%"></div><div class="cur"></div></div></div>'}).join('');
+Array.prototype.forEach.call(rows.children,function(r){r.addEventListener('click',function(){pick(r.dataset.id)})});
+function pick(id){sel=id;render()}
+var L={planned:'geplant',active:'in Arbeit',done:'fertig'};
+function render(){
+ var d=+sl.value;document.getElementById('dt').textContent=fmt(d);
+ S.forEach(function(s){var st=status(s,d),e=document.getElementById('seg'+s.id);
+  e.setAttribute('class','seg '+s.ty+' '+st+(s.est?' est':'')+(s.id===sel?' sel':''))});
+ Array.prototype.forEach.call(rows.children,function(r){r.classList.toggle('sel',r.dataset.id===sel);r.querySelector('.cur').style.left=d/N*100+'%'});
+ var s=S.filter(function(x){return x.id===sel})[0],st=status(s,d),bc=st==='active'?'b-'+s.ty:'b-'+st;
+ var n=S.filter(function(x){return status(x,d)==='active'}).length;
+ var pause=d>=off('2026-12-15')&&d<=off('2027-01-15');
+ document.getElementById('det').innerHTML='<h3>'+s.n+'</h3><span class="badge '+bc+'">'+(st==='active'?(s.ty==='full'?'Vollsperrung':'Einbahn / halbseitig'):L[st])+'</span>'
+ +(s.est?' <span class="badge b-planned">Termin geschätzt</span>':'')
+ +'<dl><dt>Straße</dt><dd>'+s.st+'</dd><dt>Zeitraum</dt><dd>'+fs(s.f)+' – '+fs(s.t)+(s.est?' (voraussichtlich)':'')+'</dd><dt>Regelung</dt><dd>'+s.reg+'</dd><dt>Umleitung</dt><dd>'+s.um+'</dd></dl>'
+ +'<p><a target="_blank" rel="noopener" href="https://www.openstreetmap.org/search?query='+encodeURIComponent(s.q)+'">In OpenStreetMap ansehen</a> · <a target="_blank" rel="noopener" href="https://www.google.com/maps/search/'+encodeURIComponent(s.q)+'">In Google Maps</a></p>'
+ +'<p class="note">'+(pause?'Winterpause: aktuell keine Bauarbeiten.':n+' Abschnitt'+(n===1?'':'e')+' an diesem Tag in Arbeit.')+'</p>'}
+sl.addEventListener('input',render);
+document.getElementById('today').addEventListener('click',function(){var t=Math.round((Date.now()-BASE)/864e5);sl.value=Math.max(0,Math.min(N,t));render()});
+render();
+</script></body></html>
